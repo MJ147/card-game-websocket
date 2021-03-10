@@ -8,7 +8,7 @@ export interface Lobby {
 }
 
 export interface Entity {
-	id: number;
+	id: string;
 	name: string;
 }
 
@@ -23,7 +23,7 @@ export interface Player extends Entity {
 }
 
 export interface Card {
-	id: number;
+	id: string;
 	rank: string;
 	suit: string;
 }
