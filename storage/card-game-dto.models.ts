@@ -12,6 +12,7 @@ export interface EntityDto {
 }
 
 export interface TableDto extends EntityDto {
+	id: string;
 	deck: number;
 	players: PlayerDto[];
 	cards: CardDto[]; // cards on table

@@ -27,24 +27,29 @@ io.on('connection', (socket: Socket) => {
 		io.emit('message', 'A user has left the table');
 	});
 
-	// Listen for new player
+	// create new player
 	socket.on('createPlayer', (request: Request<string>) => {
 		const newPlayerId = cardGameStorage.createPlayer(request.data, request.uuid);
 
 		io.emit(`playerId${request.uuid}`, newPlayerId);
 	});
 
-	// Listen for new table
+	// create new table
 	socket.on('createTable', (request: Request<string>) => {
 		const newTableId = cardGameStorage.createTable(request.data, request.uuid);
 
 		io.emit(`tableId${request.uuid}`, newTableId);
 	});
 
-	// Send all tables
+	// join user to table
+	socket.on('joinTable', (request: Request<string>) => {
+		const newTableId = cardGameStorage.joinUserToTable(request.uuid, request.data);
+		io.emit(`tableId${request.uuid}`, newTableId);
+	});
+
+	// send all tables
 	socket.on('getAllTables', (request: Request<string>) => {
 		const allTables = cardGameStorage.getAllTables(request.uuid);
-		console.log(allTables);
 
 		io.emit(`allTables${request.uuid}`, allTables);
 	});

@@ -11,10 +11,7 @@ export class CardGameStorage {
 	}
 
 	createPlayer(playerName: string, id: string): string | null {
-		const lobbyPlayers = this.cardGame.lobby.players;
-		const tablesPlayers = this.cardGame.tables.flatMap((table) => table.players);
-
-		if (this.isEntityNameExists(playerName, [...lobbyPlayers, ...tablesPlayers])) {
+		if (this.findEntityByName(playerName, this.getAllPlayers())) {
 			return null;
 		}
 
@@ -23,7 +20,7 @@ export class CardGameStorage {
 			name: playerName,
 		};
 
-		lobbyPlayers.push(player);
+		this.cardGame.lobby.players.push(player);
 
 		return player.id;
 	}
@@ -31,11 +28,8 @@ export class CardGameStorage {
 	createTable(tableName: string, playerId: string): string | null {
 		const tables = this.cardGame.tables;
 		const lobby = this.cardGame.lobby;
-		console.log(3232);
 
-		if (this.isEntityNameExists(tableName, tables)) {
-			console.log(2);
-
+		if (this.findEntityByName(tableName, tables)) {
 			return null;
 		}
 
@@ -49,9 +43,15 @@ export class CardGameStorage {
 
 		this.moveEntity(playerId, lobby.players, table.players);
 		tables.push(table);
-		console.log(tables);
 
 		return table.id;
+	}
+
+	getAllPlayers(): Player[] {
+		const lobbyPlayers = this.cardGame.lobby.players;
+		const tablesPlayers = this.cardGame.tables.flatMap((table) => table.players);
+
+		return [...lobbyPlayers, ...tablesPlayers];
 	}
 
 	getAllTables(playerId: string): TableDto[] {
@@ -68,16 +68,16 @@ export class CardGameStorage {
 			});
 			const deckDto: number = table.deck.length;
 
-			return { name: table.name, players: playersDto, deck: deckDto, cards: cardsDto };
+			return { ...table, players: playersDto, deck: deckDto, cards: cardsDto };
 		});
 	}
 
-	isEntityNameExists(entityName: string, entityList: Entity[]): boolean {
-		return entityList.some((entity) => entity.name === entityName);
+	findEntityByName(entityName: string, entityList: Entity[]): any {
+		return entityList.find((entity) => entity.name === entityName);
 	}
 
-	isEntityIdExists(entityId: string, entityList: Entity[]): boolean {
-		return entityList.some((entity) => entity.id === entityId);
+	findEntityById(entityId: string, entityList: Entity[]): any {
+		return entityList.find((entity) => entity.id === entityId);
 	}
 
 	moveEntity(entityId: string, origin: Entity[], destination: Entity[]): void {
@@ -87,5 +87,28 @@ export class CardGameStorage {
 				destination.push(entity);
 			}
 		});
+	}
+
+	joinUserToTable(playerId: string, tableId: string): string | null {
+		const tables = this.cardGame.tables;
+		const lobby = this.cardGame.lobby;
+		console.log(playerId);
+
+		if (!this.findEntityById(playerId, this.getAllPlayers())) {
+			return null;
+		}
+		console.log(tableId);
+		console.log(tables);
+
+		const table: Table = this.findEntityById(tableId, tables);
+
+		if (table == null) {
+			return null;
+		}
+		console.log(3);
+
+		this.moveEntity(playerId, lobby.players, table.players);
+
+		return table.id;
 	}
 }
