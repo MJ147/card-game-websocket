@@ -1,3 +1,5 @@
+import { TableDto } from './storage/card-game-dto.models';
+import { ISO_8601 } from 'moment';
 import { Socket } from 'socket.io';
 import { CardGameStorage } from './storage/card-game.storage';
 const path = require('path');
@@ -37,17 +39,27 @@ io.on('connection', (socket: Socket) => {
 	// create new table
 	socket.on('createTable', (request: Request<string>) => {
 		const newTableId = cardGameStorage.createTable(request.data, request.uuid);
+		io.join(newTableId);
 
 		io.emit(`tableId${request.uuid}`, newTableId);
 	});
 
 	// join user to table
 	socket.on('joinTable', (request: Request<string>) => {
-		const newTableId = cardGameStorage.joinUserToTable(request.uuid, request.data);
-		io.emit(`tableId${request.uuid}`, newTableId);
+		const table = cardGameStorage.joinUserToTable(request.uuid, request.data);
+		io.join(table?.id);
+
+		io.emit(`tableId${request.uuid}`, table?.id);
 	});
 
-	// send all tables
+	// get table
+	socket.on('getTable', (request: Request<string>) => {
+		const table = cardGameStorage.joinUserToTable(request.uuid, request.data);
+
+		io.to(table?.id).emit(`table`, table);
+	});
+
+	// get all tables
 	socket.on('getAllTables', (request: Request<string>) => {
 		const allTables = cardGameStorage.getAllTables(request.uuid);
 

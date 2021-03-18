@@ -56,20 +56,24 @@ export class CardGameStorage {
 
 	getAllTables(playerId: string): TableDto[] {
 		return this.cardGame.tables.map((table: Table) => {
-			const playersDto: PlayerDto[] = table.players.map((player: Player) => {
-				const playerDto: PlayerDto = { name: player.name, cards: player.cards?.length ?? 0 };
-
-				return playerDto;
-			});
-			const cardsDto: CardDto[] = table.cards.map((card: Card) => {
-				const cardDto: CardDto = { rank: card.rank, suit: card.suit };
-
-				return cardDto;
-			});
-			const deckDto: number = table.deck.length;
-
-			return { ...table, players: playersDto, deck: deckDto, cards: cardsDto };
+			return this.getTableDto(table);
 		});
+	}
+
+	getTableDto(table: Table): TableDto {
+		const playersDto: PlayerDto[] = table.players.map((player: Player) => {
+			const playerDto: PlayerDto = { name: player.name, cards: player.cards?.length ?? 0 };
+
+			return playerDto;
+		});
+		const cardsDto: CardDto[] = table.cards.map((card: Card) => {
+			const cardDto: CardDto = { rank: card.rank, suit: card.suit };
+
+			return cardDto;
+		});
+		const deckDto: number = table.deck.length;
+
+		return { ...table, players: playersDto, deck: deckDto, cards: cardsDto };
 	}
 
 	findEntityByName(entityName: string, entityList: Entity[]): any {
@@ -89,7 +93,7 @@ export class CardGameStorage {
 		});
 	}
 
-	joinUserToTable(playerId: string, tableId: string): string | null {
+	joinUserToTable(playerId: string, tableId: string): TableDto | null {
 		const tables = this.cardGame.tables;
 		const lobby = this.cardGame.lobby;
 		console.log(playerId);
@@ -97,18 +101,35 @@ export class CardGameStorage {
 		if (!this.findEntityById(playerId, this.getAllPlayers())) {
 			return null;
 		}
-		console.log(tableId);
-		console.log(tables);
 
 		const table: Table = this.findEntityById(tableId, tables);
 
 		if (table == null) {
 			return null;
 		}
-		console.log(3);
+
+		if (table.players.length >= 4) {
+			return null;
+		}
+
+		if (table.players.length === 4) {
+			this.prepareTable(table);
+		}
 
 		this.moveEntity(playerId, lobby.players, table.players);
 
-		return table.id;
+		return this.getTableDto(table);
+	}
+
+	prepareTable(table: Table): void {
+		table.deck = this.shuffleCards(table.deck);
+	}
+
+	shuffleCards(cards: Card[]): Card[] {
+		for (let i = cards.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[cards[i], cards[j]] = [cards[j], cards[i]];
+		}
+		return cards;
 	}
 }
