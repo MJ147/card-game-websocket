@@ -1,3 +1,4 @@
+import { table } from 'console';
 import { TableDto, PlayerDto, CardDto } from './card-game-dto.models';
 import { Player, Lobby, CardGame, Entity, Table, Card } from './card-game.models';
 const uuidv4 = require('uuid');
@@ -96,15 +97,11 @@ export class CardGameStorage {
 	joinUserToTable(playerId: string, tableId: string): TableDto | null {
 		const tables = this.cardGame.tables;
 		const lobby = this.cardGame.lobby;
-		console.log(playerId);
 
-		if (!this.findEntityById(playerId, this.getAllPlayers())) {
-			return null;
-		}
-
+		const player: Player = this.findEntityById(playerId, this.getAllPlayers());
 		const table: Table = this.findEntityById(tableId, tables);
 
-		if (table == null) {
+		if (player == null || table == null) {
 			return null;
 		}
 
@@ -116,6 +113,7 @@ export class CardGameStorage {
 			this.prepareTable(table);
 		}
 
+		player.tableId = tableId;
 		this.moveEntity(playerId, lobby.players, table.players);
 
 		return this.getTableDto(table);
@@ -131,5 +129,18 @@ export class CardGameStorage {
 			[cards[i], cards[j]] = [cards[j], cards[i]];
 		}
 		return cards;
+	}
+
+	getTable(playerId: string): TableDto | null {
+		const player: Player = this.findEntityById(playerId, this.getAllPlayers());
+		const tables = this.cardGame.tables;
+
+		if (player?.tableId == null) {
+			return null;
+		}
+
+		const table: Table = this.findEntityById(player.tableId, tables);
+
+		return this.getTableDto(table);
 	}
 }

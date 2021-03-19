@@ -20,6 +20,7 @@ export interface Table extends Entity {
 
 export interface Player extends Entity {
 	cards?: Card[];
+	tableId?: string;
 }
 
 export interface Card {
