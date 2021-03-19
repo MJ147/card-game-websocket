@@ -40,10 +40,6 @@ io.on('connection', (socket: Socket) => {
 	socket.on('createTable', (request: Request<string>) => {
 		const newTableId = cardGameStorage.createTable(request.data, request.uuid);
 
-		if (newTableId != null) {
-			socket.join(newTableId);
-		}
-
 		io.emit(`tableId${request.uuid}`, newTableId);
 	});
 
@@ -51,18 +47,21 @@ io.on('connection', (socket: Socket) => {
 	socket.on('joinTable', (request: Request<string>) => {
 		const table = cardGameStorage.joinUserToTable(request.uuid, request.data);
 
-		if (table?.id != null) {
-			socket.join(table?.id);
-		}
-
 		io.emit(`tableId${request.uuid}`, table?.id);
 	});
 
 	// get update table
 	socket.on('updateTable', (request: Request<string>) => {
 		const table = cardGameStorage.getTable(request.uuid);
+		let tableDto: TableDto;
 
-		io.to(table?.id).emit(`table`, table);
+		if (table != null) {
+			tableDto = cardGameStorage.getTableDto(table);
+		}
+
+		table?.players.forEach(({ id }) => {
+			io.emit(`table${id}`, tableDto);
+		});
 	});
 
 	// get all tables

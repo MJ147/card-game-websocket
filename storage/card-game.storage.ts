@@ -1,3 +1,4 @@
+import { Rank, Suit } from './card.enum';
 import { table } from 'console';
 import { TableDto, PlayerDto, CardDto } from './card-game-dto.models';
 import { Player, Lobby, CardGame, Entity, Table, Card } from './card-game.models';
@@ -5,6 +6,8 @@ const uuidv4 = require('uuid');
 
 export class CardGameStorage {
 	cardGame: CardGame;
+	suit: typeof Suit = Suit;
+	rank: typeof Rank = Rank;
 
 	constructor() {
 		const lobby: Lobby = { players: [] };
@@ -41,6 +44,9 @@ export class CardGameStorage {
 			cards: [],
 			players: [],
 		};
+
+		const player: Player = this.findEntityById(playerId, this.getAllPlayers());
+		player.tableId = table.id;
 
 		this.moveEntity(playerId, lobby.players, table.players);
 		tables.push(table);
@@ -109,18 +115,38 @@ export class CardGameStorage {
 			return null;
 		}
 
-		if (table.players.length === 4) {
-			this.prepareTable(table);
-		}
-
 		player.tableId = tableId;
 		this.moveEntity(playerId, lobby.players, table.players);
+
+		// if (table.players.length === 4) {
+		this.prepareTable(table);
+		// }
 
 		return this.getTableDto(table);
 	}
 
 	prepareTable(table: Table): void {
-		table.deck = this.shuffleCards(table.deck);
+		table.deck = this.shuffleCards(this.createDeck());
+		this.createDeck();
+	}
+
+	createDeck(): Card[] {
+		const deck: Card[] = [];
+		Object.keys(this.suit)
+			.filter((key) => isNaN(Number(key)))
+			.forEach((suit) => {
+				Object.keys(this.rank)
+					.filter((key) => isNaN(Number(key)))
+					.forEach((rank) => {
+						const card: Card = {
+							id: uuidv4.v4(),
+							rank,
+							suit,
+						};
+						deck.push(card);
+					});
+			});
+		return deck;
 	}
 
 	shuffleCards(cards: Card[]): Card[] {
@@ -131,7 +157,7 @@ export class CardGameStorage {
 		return cards;
 	}
 
-	getTable(playerId: string): TableDto | null {
+	getTable(playerId: string): Table | null {
 		const player: Player = this.findEntityById(playerId, this.getAllPlayers());
 		const tables = this.cardGame.tables;
 
@@ -141,6 +167,6 @@ export class CardGameStorage {
 
 		const table: Table = this.findEntityById(player.tableId, tables);
 
-		return this.getTableDto(table);
+		return table;
 	}
 }
