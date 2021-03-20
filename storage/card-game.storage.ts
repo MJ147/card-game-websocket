@@ -69,7 +69,7 @@ export class CardGameStorage {
 
 	getTableDto(table: Table): TableDto {
 		const playersDto: PlayerDto[] = table.players.map((player: Player) => {
-			const playerDto: PlayerDto = { name: player.name, cards: player.cards?.length ?? 0 };
+			const playerDto: PlayerDto = { id: player.id, name: player.name, cards: player.cards?.length ?? 0 };
 
 			return playerDto;
 		});
@@ -118,16 +118,16 @@ export class CardGameStorage {
 		player.tableId = tableId;
 		this.moveEntity(playerId, lobby.players, table.players);
 
-		// if (table.players.length === 4) {
-		this.prepareTable(table);
-		// }
+		if (table.players.length === 4) {
+			this.prepareTable(table);
+		}
 
 		return this.getTableDto(table);
 	}
 
 	prepareTable(table: Table): void {
 		table.deck = this.shuffleCards(this.createDeck());
-		this.createDeck();
+		this.dealCards(20, table.cards, table.players);
 	}
 
 	createDeck(): Card[] {
@@ -155,6 +155,13 @@ export class CardGameStorage {
 			[cards[i], cards[j]] = [cards[j], cards[i]];
 		}
 		return cards;
+	}
+
+	dealCards(numberOfCards: number, cards: Card[], players: Player[]): void {
+		const cardsToDeal: Card[] = cards.splice(numberOfCards);
+		cardsToDeal.reverse().forEach((card, idx) => {
+			players[idx % 4].cards?.push(card);
+		});
 	}
 
 	getTable(playerId: string): Table | null {
