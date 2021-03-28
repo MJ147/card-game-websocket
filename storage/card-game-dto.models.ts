@@ -1,3 +1,5 @@
+import { Card } from './card-game.models';
+
 export interface CardGameDto {
 	lobby: LobbyDto;
 	tables: TableDto[];
@@ -19,7 +21,7 @@ export interface TableDto extends EntityDto {
 }
 
 export interface PlayerDto extends EntityDto {
-	cards: number;
+	cards: Card[] | number;
 }
 
 export interface CardDto {

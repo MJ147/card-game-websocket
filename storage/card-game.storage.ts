@@ -67,9 +67,19 @@ export class CardGameStorage {
 		});
 	}
 
-	getTableDto(table: Table): TableDto {
+	getTableDto(table: Table, playerId?: string): TableDto {
 		const playersDto: PlayerDto[] = table.players.map((player: Player) => {
-			const playerDto: PlayerDto = { id: player.id, name: player.name, cards: player.cards?.length ?? 0 };
+			let cards: number | Card[] = player.cards?.length ?? 0;
+
+			if (playerId != null && player.id === playerId) {
+				cards = player.cards as Card[];
+			}
+
+			const playerDto: PlayerDto = {
+				id: player.id,
+				name: player.name,
+				cards: cards,
+			};
 
 			return playerDto;
 		});
@@ -126,8 +136,11 @@ export class CardGameStorage {
 	}
 
 	prepareTable(table: Table): void {
+		console.log(1);
 		table.deck = this.shuffleCards(this.createDeck());
-		this.dealCards(20, table.cards, table.players);
+		console.log(2);
+		this.dealCards(20, table.deck, table.players);
+		console.log(3);
 	}
 
 	createDeck(): Card[] {
@@ -150,18 +163,32 @@ export class CardGameStorage {
 	}
 
 	shuffleCards(cards: Card[]): Card[] {
+		console.log(cards.length);
+
+		console.log(1.1);
+
 		for (let i = cards.length - 1; i > 0; i--) {
+			console.log(1.2);
 			const j = Math.floor(Math.random() * (i + 1));
 			[cards[i], cards[j]] = [cards[j], cards[i]];
 		}
+		console.log(1.3);
 		return cards;
 	}
 
 	dealCards(numberOfCards: number, cards: Card[], players: Player[]): void {
-		const cardsToDeal: Card[] = cards.splice(numberOfCards);
+		console.log(2.1);
+		const cardsToDeal: Card[] = cards.splice(cards.length - numberOfCards);
 		cardsToDeal.reverse().forEach((card, idx) => {
-			players[idx % 4].cards?.push(card);
+			const player = players[idx % 4];
+			if (player.cards == null) {
+				player.cards = [];
+			}
+			console.log(2.2);
+			player.cards?.push(card);
+			console.log(players);
 		});
+		console.log(2.3);
 	}
 
 	getTable(playerId: string): Table | null {

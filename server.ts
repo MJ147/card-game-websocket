@@ -50,16 +50,15 @@ io.on('connection', (socket: Socket) => {
 		io.emit(`tableId${request.uuid}`, table?.id);
 	});
 
-	// get update table
+	// get updated table
 	socket.on('updateTable', (request: Request<string>) => {
 		const table = cardGameStorage.getTable(request.uuid);
 		let tableDto: TableDto;
 
-		if (table != null) {
-			tableDto = cardGameStorage.getTableDto(table);
-		}
-
 		table?.players.forEach(({ id }) => {
+			if (table != null) {
+				tableDto = cardGameStorage.getTableDto(table, id);
+			}
 			io.emit(`table${id}`, tableDto);
 		});
 	});
