@@ -140,7 +140,24 @@ export class CardGameStorage {
 		table.deck = this.shuffleCards(this.createDeck());
 		console.log(2);
 		this.dealCards(20, table.deck, table.players);
+		this.setPlayerTurn(table);
 		console.log(3);
+	}
+
+	setPlayerTurn(table: Table) {
+		if (table.deck.length === 0) {
+			table.playerIdTurn = undefined;
+		}
+
+		if (table.playerIdTurn == null) {
+			table.playerIdTurn = table.players[0].id;
+		}
+
+		let playerIndexCurrTurn: number = table.players.findIndex(({ id }) => {
+			id === table.playerIdTurn;
+		});
+		const playerIndexNext: number = playerIndexCurrTurn >= 3 ? 0 : playerIndexCurrTurn + 1;
+		const playerIdNextTurn: string = table.players[playerIndexNext].id;
 	}
 
 	createDeck(): Card[] {

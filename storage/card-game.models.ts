@@ -16,6 +16,7 @@ export interface Table extends Entity {
 	deck: Card[];
 	players: Player[];
 	cards: Card[]; // cards on table
+	playerIdTurn?: string;
 }
 
 export interface Player extends Entity {
