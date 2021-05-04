@@ -136,12 +136,9 @@ export class CardGameStorage {
 	}
 
 	prepareTable(table: Table): void {
-		console.log(1);
 		table.deck = this.shuffleCards(this.createDeck());
-		console.log(2);
 		this.dealCards(20, table.deck, table.players);
 		this.setPlayerTurn(table);
-		console.log(3);
 	}
 
 	setPlayerTurn(table: Table) {
@@ -180,32 +177,25 @@ export class CardGameStorage {
 	}
 
 	shuffleCards(cards: Card[]): Card[] {
-		console.log(cards.length);
-
-		console.log(1.1);
-
 		for (let i = cards.length - 1; i > 0; i--) {
-			console.log(1.2);
 			const j = Math.floor(Math.random() * (i + 1));
 			[cards[i], cards[j]] = [cards[j], cards[i]];
 		}
-		console.log(1.3);
+
 		return cards;
 	}
 
 	dealCards(numberOfCards: number, cards: Card[], players: Player[]): void {
-		console.log(2.1);
 		const cardsToDeal: Card[] = cards.splice(cards.length - numberOfCards);
 		cardsToDeal.reverse().forEach((card, idx) => {
 			const player = players[idx % 4];
+
 			if (player.cards == null) {
 				player.cards = [];
 			}
-			console.log(2.2);
+
 			player.cards?.push(card);
-			console.log(players);
 		});
-		console.log(2.3);
 	}
 
 	getTable(playerId: string): Table | null {
